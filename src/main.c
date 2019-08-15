@@ -10,6 +10,7 @@
 #include "attract.h"
 #include "palette.h"
 #include "font.h"
+#include "vblank.h"
 
 bool bQuit=false;       // Quit program
 
@@ -17,13 +18,14 @@ int main(int argc, char* argv[])
 {
   mindset_gfx_set_mode(2);
   mindset_gfx_set_palette(0,16,0,&palette);
-  /* vblank_init(); */
+  vblank_init();
   font_init();
-  
   
   while (bQuit==false)
     {
       attract();
     }
+
+  vblank_done();
   return 0;
 }

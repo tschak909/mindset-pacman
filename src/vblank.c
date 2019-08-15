@@ -30,6 +30,27 @@ void vblank_done(void)
 }
 
 /**
+ * Wait for rest of frame.
+ */
+void vblank_wait(void)
+{
+  frame_done=false;
+  while (frame_done==false) {}
+}
+
+/**
+ * Pause for X number of frames
+ */
+void vblank_pause(unsigned short f)
+{
+  unsigned short i;
+  for (i=0; i<f; i++)
+    {
+      vblank_wait();
+    }
+}
+
+/**
  * Called once every vblank (60x sec)
  * Because the Mindset BIOS calls this from far, we have to
  * handle the entry and exit from this routine, ourselves.
