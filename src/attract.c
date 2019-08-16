@@ -94,6 +94,10 @@ void attract(void)
   unsigned short pacman_x, blinky_x, pinky_x, inky_x, clyde_x;
   unsigned short pacman_frame_cnt, blinky_frame_cnt, pinky_frame_cnt, inky_frame_cnt, clyde_frame_cnt;
   unsigned short dot_frame_cnt;
+  unsigned char blinky_state, pinky_state, inky_state, clyde_state;
+  unsigned char bobs_pause;
+  unsigned char pause_timer;
+  unsigned char dot_grab;
   
   // Set initial sprite positions
   pacman_x=pacman_lx=PACMAN_X_INITIAL;
@@ -455,53 +459,113 @@ void attract(void)
       vblank_wait();
     }
 
-  // And now pac-man in beast mode
+
+  pause_timer=0;
+  bobs_pause=0;
+  blinky_state=pinky_state=inky_state=clyde_state=0;
+  
+  // And now pac-man in beast mode //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   while (pacman_x<272)
     {
       frame_done=false;
-
+      dot_grab=1;
       pacman_lx=pacman_x;
       blinky_lx=blinky_x;
       pinky_lx=pinky_x;
       inky_lx=inky_x;
       clyde_lx=clyde_x;
+
+      // Check if eaten.
+      if ((pacman_x>blinky_x+6) && (blinky_state==0))
+      	{
+      	  blinky_state=bobs_pause=1; // eaten
+      	  pause_timer=PAUSE_LONG;
+      	}
+      if ((pacman_x>pinky_x+6) && (pinky_state==0))
+      	{
+      	  pinky_state=bobs_pause=1; // eaten
+      	  pause_timer=PAUSE_LONG;
+      	}
+      if ((pacman_x>inky_x+6) && (inky_state==0))
+      	{
+      	  inky_state=bobs_pause=1; // eaten
+      	  pause_timer=PAUSE_LONG;
+      	}
+      if ((pacman_x>clyde_x+6) && (clyde_state==0))
+      	{
+      	  clyde_state=bobs_pause=1; // eaten
+      	  pause_timer=PAUSE_LONG;
+      	}
+
+      // count down timer
+      if (pause_timer>0)
+	{
+	  pause_timer--;
+	}
+      else // Set ghost to dead
+	{
+	  bobs_pause=0;
+	  if (blinky_state==1)
+	    blinky_state=2;
+	  else if (pinky_state==1)
+	    pinky_state=2;
+	  else if (inky_state==1)
+	    inky_state=2;
+	  else if (clyde_state==1)
+	    clyde_state=2;
+	}
       
       // Scoot pacman and blinky every other frame
       // Also adjust pac-man's frame every other frame
       if ((frame_cnt&1)==0)
 	{
 	  // Mouth pac-man
-	  if (pacman_frame_cnt>3)
-	    pacman_frame_cnt=0;
-	  else
-	    pacman_frame_cnt++;
+	  if (bobs_pause==0)
+	    {
+	      if (pacman_frame_cnt>3)
+		pacman_frame_cnt=0;
+	      else
+		pacman_frame_cnt++;
+	    }
 	  
-	  // Scoot pac-man and Ghosts
-	  pacman_x+=2;
-	  blinky_x+=2;
-	  pinky_x+=2;
-	  inky_x+=2;
-	  clyde_x+=2;
+	  if (bobs_pause==0)
+	    {
+	      // Scoot pac-man
+	      pacman_x+=2;
+
+	      blinky_x++;
+	      pinky_x++;
+	      inky_x++;
+	      clyde_x++;
+
+	    }
 	}
       
       // Adjust blinky animation frame every 4 frames
       if ((frame_cnt&3)==0)
 	{
-	  blinky_frame_cnt=((blinky_frame_cnt==0) ? 1 : 0);
-	  pinky_frame_cnt=((pinky_frame_cnt==0) ? 1 : 0);
-	  inky_frame_cnt=((inky_frame_cnt==0) ? 1 : 0);
-	  clyde_frame_cnt=((clyde_frame_cnt==0) ? 1 : 0);
+	  if (bobs_pause==0)
+	    {
+	      blinky_frame_cnt=((blinky_frame_cnt==0) ? 1 : 0);
+	      pinky_frame_cnt=((pinky_frame_cnt==0) ? 1 : 0);
+	      inky_frame_cnt=((inky_frame_cnt==0) ? 1 : 0);
+	      clyde_frame_cnt=((clyde_frame_cnt==0) ? 1 : 0);
+	    }
 	}
 
       // Make pac-man creep up a bit more...
       if ((frame_cnt&7)==0)
 	{
-	  dot_frame_cnt=((dot_frame_cnt==0) ? 1 : 0);	  
-	  blinky_x--;
-	  pinky_x--;
-	  inky_x--;
-	  clyde_x--;
-	  pacman_x++;
+	  dot_frame_cnt=((dot_frame_cnt==0) ? 1 : 0);
+
+	  if (bobs_pause==0)
+	    {
+	      blinky_x--;
+	      pinky_x--;
+	      inky_x--;
+	      clyde_x--;
+	      pacman_x++;
+	    }
 	}
 
       // Plot the big dots /////////////////////////////////////////////
@@ -511,16 +575,20 @@ void attract(void)
       tpd[2]=1;
       tpd[3]=FP_OFF((dot_frame_cnt==0) ? attract_dot_0 : attract_dot_1);
       tpd[4]=FP_SEG((dot_frame_cnt==0) ? attract_dot_0 : attract_dot_1);
-      tpd[5]=16;
-      tpd[6]=ATTRACT_Y+4;
-      tpd[7]=1;
-      tpd[8]=FP_OFF((dot_frame_cnt==0) ? attract_dot_0 : attract_dot_1);
-      tpd[9]=FP_SEG((dot_frame_cnt==0) ? attract_dot_0 : attract_dot_1);
+
+      if (dot_grab==0)
+	{
+	  tpd[5]=16;
+	  tpd[6]=ATTRACT_Y+4;
+	  tpd[7]=1;
+	  tpd[8]=FP_OFF((dot_frame_cnt==0) ? attract_dot_0 : attract_dot_1);
+	  tpd[9]=FP_SEG((dot_frame_cnt==0) ? attract_dot_0 : attract_dot_1);
+	}
       
       // Set up text string call
       regs.h.ah=0x21;       // BLT STRING
       regs.h.al=2;          // BLT ID 1
-      regs.h.ch=2;          // # of text pointer structs
+      regs.h.ch=((dot_grab==0) ? 2 : 1);      // # of text pointer structs
       regs.h.cl=0;          // # of text chars to ignore at beginning of string (none)
       regs.h.dh=0;          // draw left to right
       regs.h.dl=0xAA;       // color
@@ -593,65 +661,161 @@ void attract(void)
       bpa[49]=0xFFFF;
 
       // PACMAN
-      bpa[50]=FP_OFF(pacman_right_frames[pacman_frame_cnt]);
-      bpa[51]=FP_SEG(pacman_right_frames[pacman_frame_cnt]);
-      bpa[52]=8;
-      bpa[53]=0;
-      bpa[54]=0;
-      bpa[55]=pacman_x;
-      bpa[56]=ATTRACT_Y;
-      bpa[57]=16;
-      bpa[58]=16;
-      bpa[59]=0xFFFF;
-
-      // BLINKY
-      bpa[60]=FP_OFF(blinkyblue_frames[blinky_frame_cnt]);
-      bpa[61]=FP_SEG(blinkyblue_frames[blinky_frame_cnt]);
-      bpa[62]=8;
-      bpa[63]=0;
-      bpa[64]=0;
-      bpa[65]=blinky_x;
-      bpa[66]=ATTRACT_Y;
-      bpa[67]=16;
-      bpa[68]=16;
-      bpa[69]=0xFFFF;
-
-      // PINKY
-      bpa[70]=FP_OFF(blinkyblue_frames[pinky_frame_cnt]);
-      bpa[71]=FP_SEG(blinkyblue_frames[pinky_frame_cnt]);
-      bpa[72]=8;
-      bpa[73]=0;
-      bpa[74]=0;
-      bpa[75]=pinky_x;
-      bpa[76]=ATTRACT_Y;
-      bpa[77]=16;
-      bpa[78]=16;
-      bpa[79]=0xFFFF;
-
-      // INKY
-      bpa[80]=FP_OFF(blinkyblue_frames[inky_frame_cnt]);
-      bpa[81]=FP_SEG(blinkyblue_frames[inky_frame_cnt]);
-      bpa[82]=8;
-      bpa[83]=0;
-      bpa[84]=0;
-      bpa[85]=inky_x;
-      bpa[86]=ATTRACT_Y;
-      bpa[87]=16;
-      bpa[88]=16;
-      bpa[89]=0xFFFF;
-
-      // CLYDE
-      bpa[90]=FP_OFF(blinkyblue_frames[clyde_frame_cnt]);
-      bpa[91]=FP_SEG(blinkyblue_frames[clyde_frame_cnt]);
+      bpa[90]=FP_OFF(pacman_right_frames[pacman_frame_cnt]);
+      bpa[91]=FP_SEG(pacman_right_frames[pacman_frame_cnt]);
       bpa[92]=8;
       bpa[93]=0;
       bpa[94]=0;
-      bpa[95]=clyde_x;
+      bpa[95]=pacman_x;
       bpa[96]=ATTRACT_Y;
       bpa[97]=16;
       bpa[98]=16;
       bpa[99]=0xFFFF;
 
+      // BLINKY
+      switch(blinky_state)
+	{
+	case 0: // Alive
+	  bpa[50]=FP_OFF(blinkyblue_frames[blinky_frame_cnt]);
+	  bpa[51]=FP_SEG(blinkyblue_frames[blinky_frame_cnt]);
+	  break;
+	case 1: // 200 Points
+	  bpa[50]=FP_OFF(bonus_200);
+	  bpa[51]=FP_SEG(bonus_200);
+	  break;
+	case 2: // Dead
+	  bpa[50]=FP_OFF(blank);
+	  bpa[51]=FP_SEG(blank);
+	  break;
+	}
+      
+      bpa[52]=8;
+      bpa[53]=0;
+      bpa[54]=0;
+      bpa[55]=blinky_x;
+      bpa[56]=ATTRACT_Y;
+      bpa[57]=16;
+      bpa[58]=16;
+      bpa[59]=0xFFFF;
+      
+      // PINKY
+      switch(pinky_state)
+	{
+	case 0: // Alive
+	  bpa[60]=FP_OFF(blinkyblue_frames[pinky_frame_cnt]);
+	  bpa[61]=FP_SEG(blinkyblue_frames[pinky_frame_cnt]);
+	  break;
+	case 1: // 400 points
+	  bpa[60]=FP_OFF(bonus_400);
+	  bpa[61]=FP_SEG(bonus_400);
+	  break;
+	case 2: // Dead
+	  bpa[60]=FP_OFF(blank);
+	  bpa[61]=FP_SEG(blank);
+	  break;
+	}
+
+      bpa[62]=8;
+      bpa[63]=0;
+      bpa[64]=0;
+      bpa[65]=pinky_x;
+      bpa[66]=ATTRACT_Y;
+      bpa[67]=16;
+      bpa[68]=16;
+      bpa[69]=0xFFFF;
+      
+      // INKY
+      switch(inky_state)
+	{
+	case 0: // Alive
+	  bpa[70]=FP_OFF(blinkyblue_frames[inky_frame_cnt]);
+	  bpa[71]=FP_SEG(blinkyblue_frames[inky_frame_cnt]);
+	  break;
+	case 1: // 800 points
+	  bpa[70]=FP_OFF(bonus_800);
+	  bpa[71]=FP_SEG(bonus_800);
+	  break;
+	case 2: // Dead
+	  bpa[70]=FP_OFF(blank);
+	  bpa[71]=FP_SEG(blank);
+	  break;
+	}
+
+      bpa[72]=8;
+      bpa[73]=0;
+      bpa[74]=0;
+      bpa[75]=inky_x;
+      bpa[76]=ATTRACT_Y;
+      bpa[77]=16;
+      bpa[78]=16;
+      bpa[79]=0xFFFF;
+      
+      // CLYDE
+      switch(clyde_state)
+	{
+	case 0: // Alive
+	  bpa[80]=FP_OFF(blinkyblue_frames[clyde_frame_cnt]);
+	  bpa[81]=FP_SEG(blinkyblue_frames[clyde_frame_cnt]);
+	  break;
+	case 1: // 1600 POINTS
+	  bpa[80]=FP_OFF(bonus_1600);
+	  bpa[81]=FP_SEG(bonus_1600);
+	  break;
+	case 2: // Dead
+	  bpa[80]=FP_OFF(blank);
+	  bpa[81]=FP_SEG(blank);
+	  break;
+	}
+
+      bpa[82]=8;
+      bpa[83]=0;
+      bpa[84]=0;
+      bpa[85]=clyde_x;
+      bpa[86]=ATTRACT_Y;
+      bpa[87]=16;
+      bpa[88]=16;
+      bpa[89]=0xFFFF;
+
+      // Make PAC-MAN temporarily disappear if bobs are paused.
+      if (bobs_pause==1)
+	{
+	  bpa[90]=FP_OFF(blank);
+	  bpa[91]=FP_SEG(blank);
+	  bpa[92]=8;
+	  bpa[93]=0;
+	  bpa[94]=0;
+	  bpa[95]=pacman_x;
+	  bpa[96]=ATTRACT_Y;
+	  bpa[97]=1;
+	  bpa[98]=1;
+	  bpa[99]=0xFFFF;
+	}
+
+      // Make ghosts disappear if dead.
+      if (blinky_state==2)
+	{
+	  bpa[57]=0;
+	  bpa[58]=0;
+	}
+      
+      if (pinky_state==2)
+	{
+	  bpa[67]=0;
+	  bpa[68]=0;
+	}
+
+      if (inky_state==2)
+	{
+	  bpa[77]=0;
+	  bpa[78]=0;
+	}
+
+      if (clyde_state==2)
+	{
+	  bpa[87]=0;
+	  bpa[88]=0;
+	}
+      
       // Set up the BLT COPY
       regs.h.ah=0x08;       // BLT copy
       regs.h.al=1;          // BLT id
