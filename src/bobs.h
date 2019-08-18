@@ -7,6 +7,9 @@
 #ifndef BOBS_H
 #define BOBS_H
 
+#define BOB_X_SIZE 16
+#define BOB_Y_SIZE 16
+
 const unsigned char blank[]=
   {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
