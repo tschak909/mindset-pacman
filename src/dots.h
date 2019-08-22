@@ -16,8 +16,8 @@ void dots_new(unsigned char* dest);
 void dots_new_game(void);
 
 /**
- * plot all dots
+ * plot all dots for given player
  */
-void dots_plot(void);
+void dots_plot(unsigned char p);
 
 #endif /* DOTS_H*/

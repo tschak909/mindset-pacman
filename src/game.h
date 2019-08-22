@@ -17,4 +17,14 @@ void game_new(void);
  */
 void game_run(void);
 
+/**
+ * Display READY!
+ */
+void game_display_ready(bool display);
+
+/**
+ * Plot blitter objects
+ */
+void game_plot(void);
+
 #endif /* GAME_H */

@@ -135,18 +135,20 @@ void dots_new_game(void)
 }
 
 /**
- * Plot all dots
+ * Plot all dots for a given dotmap
  */
-void dots_plot(void)
+void dots_plot(unsigned char p)
 {
   union REGPACK regs;
   unsigned short i;
+  unsigned char* dm=(p==0 ? &dotmap_0 : &dotmap_1);
+  
   for (i=0;i<sizeof(dotmap);i++)
     {
-      if (dotmap[i]<0xFD)
+      if (dm[i]<0xFD)
 	{
 	  // Choose appropriate bitmap.
-	  switch(dotmap[i])
+	  switch(dm[i])
 	    {
 	    case 0x01:
 	      dotbp[0]=FP_OFF(dot);
