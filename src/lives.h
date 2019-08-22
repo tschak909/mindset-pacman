@@ -3,9 +3,9 @@
  */
 
 /**
- * Display number of lives
+ * Display number of lives for given player.
  */
-void lives_display(void);
+void lives_display(unsigned char p);
 
 /**
  * Reset # of lives

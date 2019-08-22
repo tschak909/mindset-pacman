@@ -8,6 +8,11 @@
 #include <stdbool.h>
 
 /**
+ * Update and display scores
+ */
+void score_update(void);
+
+/**
  * Print score right justified to variable, with
  * 00 for 0 points.
  */
@@ -47,5 +52,10 @@ void score_display_2up(void);
  * Score Reset
  */
 void score_reset(void);
+
+/**
+ * Score new game
+ */
+void score_new_game(void);
 
 #endif /* SCORE_H */

@@ -213,10 +213,34 @@ void score_display_2up(void)
 /**
  * Score Reset
  */
-void score_reset(void)
+void score_poweron(void)
 {
   score_hi=score_1up=score_2up=0;
+  score_update();
+}
+
+/**
+ * Score new game
+ */
+void score_new_game(void)
+{
+  score_1up=score_2up=0;
+  score_update();
+}
+
+/**
+ * Update and display scores
+ */
+void score_update(void)
+{
   score_set(score_hi,&score_hi_text);
   score_set(score_1up,&score_1up_text);
   score_set(score_2up,&score_2up_text);
+
+  score_header_hi();
+  score_display_hi();
+  score_header_1up(false); // TODO: make these blink
+  score_display_1up();
+  score_header_2up(false); // TODO: make these blink
+  score_display_2up();
 }

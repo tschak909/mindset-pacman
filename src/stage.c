@@ -5,8 +5,8 @@
 #include <i86.h>
 
 unsigned short stage_bp[50];
-
 const unsigned char* stage_map[5];
+unsigned short stage_0, stage_1;
 
 #define STAGE_OFFSET_X_START 304
 #define STAGE_OFFSET_X_SCOOT 16
@@ -23,6 +23,14 @@ extern const unsigned char apple[];
 extern const unsigned char melon[];
 extern const unsigned char galaxian[];
 extern const unsigned char key[];
+
+/**
+ * Reset Stage to 0 (Cherry)
+ */
+void stage_cherry(void)
+{
+  stage_0=stage_1=0;
+}
 
 /**
  * Display Current Stage
