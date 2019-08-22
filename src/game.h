@@ -27,4 +27,9 @@ void game_display_ready(bool display);
  */
 void game_plot(void);
 
+/**
+ * Display READY!
+ */
+void game_display_game_over(bool display);
+
 #endif /* GAME_H */

@@ -20,6 +20,9 @@
 #define READY_X 72
 #define READY_Y 105
 
+#define GAME_OVER_X 56
+#define GAME_OVER_Y 105
+
 unsigned char current_player;
 unsigned short game_bp[BP_SIZE];
 
@@ -32,8 +35,11 @@ extern const unsigned char inky_1_right[];
 
 const char* ready="READY[";       // READY!
 const char* ready_blank="      "; // blank
+const char* game_over="GAME OVER"; // GAME OVER
+const char* game_over_blank="         "; // blank
 
 unsigned short ready_tp[5]={READY_X,READY_Y,6,0,0};
+unsigned short game_over_tp[5]={GAME_OVER_X,GAME_OVER_Y,9,0,0};
 
 /**
  * New game, reset everything
@@ -48,7 +54,7 @@ void game_new(void)
   lives_display(current_player);
   maze_draw();
   dots_plot(current_player);
-  game_display_ready(true);
+  game_display_game_over(true);
   game_plot();
 }
 
@@ -81,8 +87,31 @@ void game_display_ready(bool display)
   regs.w.es=FP_SEG(ready_tp); // Text pointer (seg)
   regs.w.bx=FP_OFF(ready_tp); // Text pointer (off)
   intr(0xEF,&regs);
-
 }
+
+/**
+ * Display READY!
+ */
+void game_display_game_over(bool display)
+{
+  union REGPACK regs;
+  game_over_tp[3]=(display==true ? FP_OFF(game_over) : FP_OFF(game_over_blank));
+  game_over_tp[4]=(display==true ? FP_SEG(game_over) : FP_OFF(game_over_blank));
+
+  // Set up text string call
+  regs.h.ah=0x21;       // BLT STRING
+  regs.h.al=1;          // BLT ID 1
+  regs.h.ch=1;          // # of text pointer structs
+  regs.h.cl=0;          // # of text chars to ignore at beginning of string (none)
+  regs.h.dh=0;          // draw left to right
+  regs.h.dl=0x22;       // color
+  regs.w.si=0;          // X origin
+  regs.w.di=0;          // Y origin
+  regs.w.es=FP_SEG(game_over_tp); // Text pointer (seg)
+  regs.w.bx=FP_OFF(game_over_tp); // Text pointer (off)
+  intr(0xEF,&regs);
+}
+
 
 
 /**
