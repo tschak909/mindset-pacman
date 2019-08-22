@@ -1,0 +1,3 @@
+#!/bin/bash
+
+rm -rf *.l* *.o* *.m* *.s* *.e*
