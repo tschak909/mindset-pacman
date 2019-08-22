@@ -15,6 +15,8 @@
 #include "maze.h"
 #include "score.h"
 #include "lives.h"
+#include "stage.h"
+#include "dots.h"
 
 bool bQuit=false;       // Quit program
 extern bool frame_done;
@@ -39,7 +41,11 @@ int main(int argc, char* argv[])
   score_display_1up();
   score_header_2up(false);
   score_display_2up();
-  
+  stage_display(4);
+  dots_plot();
   vblank_done();
+
+  while (!kbhit()) {}
+  
   return 0;
 }
