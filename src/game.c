@@ -13,6 +13,7 @@
 #include "dots.h"
 #include "lives.h"
 #include "maze.h"
+#include "vblank.h"
 
 #define NUM_OBJECTS 1
 #define BP_SIZE 10*NUM_OBJECTS
@@ -26,12 +27,19 @@
 unsigned char current_player;
 unsigned short game_bp[BP_SIZE];
 
-unsigned char pacman_x=84;
-unsigned char pacman_y=140;
+unsigned char pacman_x=19;
+unsigned char pacman_y=10;
+Direction pacman_direction, pacman_direction_last=LEFT;
 
 extern unsigned long score_hi, score_1up, score_2up;   // scores
-extern const unsigned char pacman_13_left_1[];
+extern const unsigned char pacman_13_left_0[];
 extern const unsigned char inky_1_right[];
+
+extern const unsigned short dot_x;
+extern const unsigned short dot_y;
+
+extern unsigned char frame_done;
+extern unsigned short frame_cnt;
 
 const char* ready="READY[";       // READY!
 const char* ready_blank="      "; // blank
@@ -64,6 +72,10 @@ void game_new(void)
 void game_run(void)
 {
   game_new();
+  while(true)
+    {
+      game_loop();
+    }
 }
 
 /**
@@ -112,8 +124,6 @@ void game_display_game_over(bool display)
   intr(0xEF,&regs);
 }
 
-
-
 /**
  * Plot blitter objects
  */
@@ -121,15 +131,15 @@ void game_plot(void)
 {
   union REGPACK regs;
   // PAC-MAN
-  game_bp[0]=FP_OFF(pacman_13_left_1);
-  game_bp[1]=FP_SEG(pacman_13_left_1);
+  game_bp[0]=FP_OFF(pacman_13_left_0);
+  game_bp[1]=FP_SEG(pacman_13_left_0);
   game_bp[2]=8;
   game_bp[3]=0;
   game_bp[4]=0;
   game_bp[5]=pacman_x;
   game_bp[6]=pacman_y;
   game_bp[7]=13;
-  game_bp[8]=12;
+  game_bp[8]=11;
   game_bp[9]=0xFFFF;
 
   // Set up the BLT COPY
@@ -137,9 +147,45 @@ void game_plot(void)
   regs.h.al=1;          // BLT id
   regs.w.cx=1;         // # of blits to do
   regs.w.dx=0;          // Top/bottom, left/right normal blit
-  regs.w.si=0;          // X origin
-  regs.w.di=0;          // Y origin
+  regs.w.si=-6;          // X origin
+  regs.w.di=-3;          // Y origin
   regs.w.es=FP_SEG(game_bp); // pointer to blitter params
   regs.w.bx=FP_OFF(game_bp); // ""      "" 
   intr(0xEF,&regs);  
+}
+
+/**
+ * Check for maze collision
+ */
+void game_check_maze_collision(unsigned short x, unsigned short y, Direction d)
+{
+ 
+}
+
+/**
+ * Check pac-man's collisions
+ */
+void game_check_collisions_pacman(void)
+{
+  game_check_maze_collision(pacman_x,pacman_y,pacman_direction);
+}
+
+/**
+ * Check for collisions (software)
+ */
+void game_check_collisions(void)
+{
+  game_check_collisions_pacman();
+}
+
+/**
+ * Game frame loop
+ */
+void game_loop(void)
+{
+  frame_done=false;
+
+  game_check_collisions();
+  
+  vblank_wait();
 }

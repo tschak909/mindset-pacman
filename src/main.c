@@ -26,6 +26,7 @@ int main(int argc, char* argv[])
 {
   mindset_gfx_set_mode(2);
   mindset_gfx_set_palette(0,16,0,&palette);
+  mindset_gfx_set_transfer_mode(1,0);
   vblank_init();
   font_init();
 
