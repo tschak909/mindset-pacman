@@ -47,9 +47,15 @@ void game_display_game_over(bool display);
 void game_loop(void);
 
 /**
- * Check for maze collision
+ * Move objects according to their dx/dy
  */
-void game_check_maze_collision(unsigned short x, unsigned short y, Direction d);
+void game_move_objects(void);
+
+/**
+ * Check for maze collision
+ * Returns dx and dy values
+ */
+void game_check_maze_collision(unsigned short x, unsigned short y, Direction d, unsigned char* dx, unsigned char* dy);
 
 /**
  * Check pac-man's collisions
