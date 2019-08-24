@@ -34,10 +34,11 @@ unsigned char pacman_x,pacman_lx;
 unsigned char pacman_y,pacman_ly;
 Direction pacman_direction, pacman_direction_last=LEFT;
 unsigned char pacman_dx,pacman_dy;
-unsigned char pacman_frame_cnt;
+unsigned char pacman_frame_cnt=0;
 
 extern unsigned long score_hi, score_1up, score_2up;   // scores
-extern const unsigned char pacman_13_left_0[];
+extern const unsigned char __far* pacman_13_left_frames[5];
+
 extern const unsigned char inky_1_right[];
 
 extern const unsigned char dotmap[1024];
@@ -61,6 +62,9 @@ void game_new(void)
   // Test fixture // remove
   pacman_x=pacman_lx=dot_to_pixel_x[27];
   pacman_y=pacman_ly=dot_to_pixel_y[1];
+  pacman_dx=-1;
+  pacman_dy=0;
+  pacman_direction=LEFT;
   
   lives_reset();
   score_new_game();
@@ -137,8 +141,8 @@ void game_plot(void)
 {
   union REGPACK regs;
   // PAC-MAN
-  game_bp[0]=FP_OFF(pacman_13_left_0);
-  game_bp[1]=FP_SEG(pacman_13_left_0);
+  game_bp[0]=FP_OFF(pacman_13_left_frames[pacman_frame_cnt]);
+  game_bp[1]=FP_SEG(pacman_13_left_frames[pacman_frame_cnt]);
   game_bp[2]=8;
   game_bp[3]=0;
   game_bp[4]=0;
@@ -166,8 +170,8 @@ void game_plot(void)
  */
 void game_check_maze_collision(unsigned short x, unsigned short y, Direction d, unsigned char* dx, unsigned char* dy)
 {
-  unsigned short tx=(x/6); // Tile positions
-  unsigned short ty=(x/6);
+  unsigned short tx=((x+2)/6); // Tile positions
+  unsigned short ty=((y+4)/6);
 
   // derive adjacent tile
   switch(d)
@@ -188,6 +192,7 @@ void game_check_maze_collision(unsigned short x, unsigned short y, Direction d, 
 
   if (dotmap[ty+tx]>0xFC)
     {
+
       // We hit a wall, zero out dx/dy
       dx=dy=0;
     }
@@ -215,14 +220,14 @@ void game_check_collisions(void)
 void game_animate_objects(void)
 {
   // Stuff that happens every other frame.
-  if (frame_cnt&1==0)
+  if ((frame_cnt&1)==0)
     {
       if ((pacman_dx==0) && (pacman_dy==0))
-	pacman_frame_cnt=0;
-      else if (pacman_frame_cnt>3)
-	pacman_frame_cnt=0;
+      	pacman_frame_cnt=0;
+      else if (pacman_frame_cnt==4)
+      	pacman_frame_cnt=0;
       else
-	pacman_frame_cnt++;
+      	pacman_frame_cnt++;
     }
 }
 
@@ -245,7 +250,8 @@ void game_loop(void)
   frame_done=false;
 
   game_check_collisions();
-  game_move_objects();
+  game_animate_objects();
+  /* game_move_objects(); */
   game_plot();
   
   vblank_wait();

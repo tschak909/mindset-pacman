@@ -5,6 +5,8 @@
 #ifndef DOTS_H
 #define DOTS_H
 
+#define PIXEL_TO_DOT(x,y) ((y+2)/6)+((x+4)/6)
+
 /**
  * Reset dotmap (for e.g. new stage)
  */

@@ -49,8 +49,6 @@ const unsigned char dotmap[1024]=
 unsigned char dotmap_0[1024];
 unsigned char dotmap_1[1024];
 
-#define DOT_Y(i) div6()
-
 extern const unsigned char dot[];
 extern const unsigned char powerpellet[];
 
