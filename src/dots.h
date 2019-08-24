@@ -16,6 +16,11 @@ void dots_new(unsigned char* dest);
 void dots_new_game(void);
 
 /**
+ * Update a single dot position
+ */
+void dot_plot(unsigned char p, unsigned short d);
+
+/**
  * plot all dots for given player
  */
 void dots_plot(unsigned char p);

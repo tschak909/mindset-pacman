@@ -40,9 +40,6 @@ extern unsigned long score_hi, score_1up, score_2up;   // scores
 extern const unsigned char pacman_13_left_0[];
 extern const unsigned char inky_1_right[];
 
-extern const unsigned short pixel_to_dot_x[];
-extern const unsigned short pixel_to_dot_y[];
-
 extern const unsigned char dotmap[1024];
 
 extern unsigned char frame_done;
@@ -169,8 +166,8 @@ void game_plot(void)
  */
 void game_check_maze_collision(unsigned short x, unsigned short y, Direction d, unsigned char* dx, unsigned char* dy)
 {
-  unsigned short tx=pixel_to_dot_x[x]; // Tile positions
-  unsigned short ty=pixel_to_dot_y[y];
+  unsigned short tx=(x/6); // Tile positions
+  unsigned short ty=(x/6);
 
   // derive adjacent tile
   switch(d)
