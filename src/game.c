@@ -15,7 +15,7 @@
 #include "maze.h"
 #include "vblank.h"
 
-#define NUM_OBJECTS 2
+#define NUM_OBJECTS 3
 #define BP_SIZE 10*NUM_OBJECTS
 
 #define READY_X 72
@@ -138,30 +138,31 @@ void game_display_game_over(bool display)
 void game_plot(void)
 {
   union REGPACK regs;
-
-  // Any dots behind pac-man
-  game_bp[0]=FP_OFF(blank);
-  game_bp[1]=FP_SEG(blank);
-  game_bp[2]=8;
-  game_bp[3]=0;
-  game_bp[4]=0;
-  game_bp[5]=pacman_lx;
-  game_bp[6]=pacman_ly;
-  game_bp[7]=13;
-  game_bp[8]=11;
-  game_bp[9]=0xFFFF;
+  int i=0;
+  
+  // blank
+  game_bp[i++]=FP_OFF(blank);
+  game_bp[i++]=FP_SEG(blank);
+  game_bp[i++]=8;
+  game_bp[i++]=0;
+  game_bp[i++]=0;
+  game_bp[i++]=pacman_lx;
+  game_bp[i++]=pacman_ly;
+  game_bp[i++]=13;
+  game_bp[i++]=11;
+  game_bp[i++]=0xFFFF;
 
   // PAC-MAN
-  game_bp[10]=FP_OFF(pacman_13_left_frames[pacman_frame_cnt]);
-  game_bp[11]=FP_SEG(pacman_13_left_frames[pacman_frame_cnt]);
-  game_bp[12]=8;
-  game_bp[13]=0;
-  game_bp[14]=0;
-  game_bp[15]=pacman_x;
-  game_bp[16]=pacman_y;
-  game_bp[17]=13;
-  game_bp[18]=11;
-  game_bp[19]=0xFFFF;
+  game_bp[i++]=FP_OFF(pacman_13_left_frames[pacman_frame_cnt]);
+  game_bp[i++]=FP_SEG(pacman_13_left_frames[pacman_frame_cnt]);
+  game_bp[i++]=8;
+  game_bp[i++]=0;
+  game_bp[i++]=0;
+  game_bp[i++]=pacman_x;
+  game_bp[i++]=pacman_y;
+  game_bp[i++]=13;
+  game_bp[i++]=11;
+  game_bp[i++]=0xFFFF;
 
   // Set up the BLT COPY
   regs.h.ah=0x08;       // BLT copy
@@ -176,20 +177,24 @@ void game_plot(void)
 }
 
 /**
- * Check for maze collision
- * Returns dx and dy values
- */
-void game_pacman_check_maze_collision(unsigned short x, unsigned short y, Direction d)
-{
-}
-
-/**
  * Check pac-man's collisions
  */
 void game_check_collisions_pacman(void)
 {
   unsigned short tx=PIXEL_TO_DOT_X(pacman_x);
   unsigned short ty=PIXEL_TO_DOT_Y(pacman_y);
+
+  switch(dot_check(current_player,tx,ty))
+    {
+    case 0x01:
+      score_add(current_player,10);
+      dot_remove(current_player,tx,ty);
+      break;
+    case 0x02:
+      score_add(current_player,50);
+      dot_remove(current_player,tx,ty);
+      break;
+    }
   
   // derive adjacent tile
   switch(pacman_direction)

@@ -244,3 +244,26 @@ void score_update(void)
   score_header_2up(false); // TODO: make these blink
   score_display_2up();
 }
+
+/**
+ * Add points to score and update display
+ */
+void score_add(unsigned char p, unsigned short a)
+{
+  switch(p)
+    {
+    case 0:
+      score_1up+=a;
+      break;
+    case 1:
+      score_2up+=a;
+      break;
+    }
+
+  if (score_1up>score_hi)
+    score_hi=score_1up;
+  else if (score_2up>score_hi)
+    score_hi=score_2up;
+  
+  score_update();
+}

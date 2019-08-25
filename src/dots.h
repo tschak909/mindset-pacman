@@ -35,4 +35,14 @@ void dots_plot(unsigned char p);
  */
 bool dot_check_wall(unsigned char p, unsigned char tx, unsigned char ty);
 
+/**
+ * Return dot under current tile
+ */
+unsigned char dot_check(unsigned char p, unsigned char tx, unsigned char ty);
+
+/**
+ * Remove dot
+ */
+void dot_remove(unsigned char p, unsigned char tx, unsigned char ty);
+
 #endif /* DOTS_H*/

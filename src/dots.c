@@ -131,10 +131,33 @@ void dots_plot(unsigned char p)
 }
 
 /**
+ * Return dot under current tile
+ */
+unsigned char dot_check(unsigned char p, unsigned char tx, unsigned char ty)
+{
+  return (p==0 ? dotmap_0[(ty<<5)+tx] : dotmap_1[(ty<<5)+tx]);
+}
+
+/**
  * Check for wall
  */
 bool dot_check_wall(unsigned char p, unsigned char tx, unsigned char ty)
 {
-  unsigned char d=(p==0 ? dotmap_0[(ty<<5)+tx] : dotmap_1[(ty<<5)+tx]);
-  return d>0xFC;
+  return dot_check(p,tx,ty)>0xFC;
+}
+
+/**
+ * Remove dot
+ */
+void dot_remove(unsigned char p, unsigned char tx, unsigned char ty)
+{
+  switch (p)
+    {
+    case 0:
+      dotmap_0[(ty<<5)+tx]=0x00;
+      break;
+    case 1:
+      dotmap_1[(ty<<5)+tx]=0x00;
+      break;
+    }
 }

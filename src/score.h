@@ -58,4 +58,9 @@ void score_reset(void);
  */
 void score_new_game(void);
 
+/**
+ * Add points to score and update display
+ */
+void score_add(unsigned char p, unsigned short a);
+
 #endif /* SCORE_H */
