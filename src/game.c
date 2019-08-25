@@ -15,7 +15,7 @@
 #include "maze.h"
 #include "vblank.h"
 
-#define NUM_OBJECTS 1
+#define NUM_OBJECTS 2
 #define BP_SIZE 10*NUM_OBJECTS
 
 #define READY_X 72
@@ -39,9 +39,7 @@ unsigned char pacman_frame_cnt=0;
 extern unsigned long score_hi, score_1up, score_2up;   // scores
 extern const unsigned char __far* pacman_13_left_frames[5];
 
-extern const unsigned char inky_1_right[];
-
-extern const unsigned char dotmap[1024];
+extern const unsigned char blank[];
 
 extern unsigned char frame_done;
 extern unsigned short frame_cnt;
@@ -140,22 +138,35 @@ void game_display_game_over(bool display)
 void game_plot(void)
 {
   union REGPACK regs;
-  // PAC-MAN
-  game_bp[0]=FP_OFF(pacman_13_left_frames[pacman_frame_cnt]);
-  game_bp[1]=FP_SEG(pacman_13_left_frames[pacman_frame_cnt]);
+
+  // Any dots behind pac-man
+  game_bp[0]=FP_OFF(blank);
+  game_bp[1]=FP_SEG(blank);
   game_bp[2]=8;
   game_bp[3]=0;
   game_bp[4]=0;
-  game_bp[5]=pacman_x;
-  game_bp[6]=pacman_y;
+  game_bp[5]=pacman_lx;
+  game_bp[6]=pacman_ly;
   game_bp[7]=13;
   game_bp[8]=11;
   game_bp[9]=0xFFFF;
 
+  // PAC-MAN
+  game_bp[10]=FP_OFF(pacman_13_left_frames[pacman_frame_cnt]);
+  game_bp[11]=FP_SEG(pacman_13_left_frames[pacman_frame_cnt]);
+  game_bp[12]=8;
+  game_bp[13]=0;
+  game_bp[14]=0;
+  game_bp[15]=pacman_x;
+  game_bp[16]=pacman_y;
+  game_bp[17]=13;
+  game_bp[18]=11;
+  game_bp[19]=0xFFFF;
+
   // Set up the BLT COPY
   regs.h.ah=0x08;       // BLT copy
   regs.h.al=1;          // BLT id
-  regs.w.cx=1;         // # of blits to do
+  regs.w.cx=NUM_OBJECTS;         // # of blits to do
   regs.w.dx=0;          // Top/bottom, left/right normal blit
   regs.w.si=-6;          // X origin
   regs.w.di=-3;          // Y origin
@@ -168,13 +179,20 @@ void game_plot(void)
  * Check for maze collision
  * Returns dx and dy values
  */
-void game_check_maze_collision(unsigned short x, unsigned short y, Direction d, unsigned char* dx, unsigned char* dy)
+void game_pacman_check_maze_collision(unsigned short x, unsigned short y, Direction d)
 {
-  unsigned short tx=((x+2)/6); // Tile positions
-  unsigned short ty=((y+4)/6);
+}
 
+/**
+ * Check pac-man's collisions
+ */
+void game_check_collisions_pacman(void)
+{
+  unsigned short tx=PIXEL_TO_DOT_X(pacman_x);
+  unsigned short ty=PIXEL_TO_DOT_Y(pacman_y);
+  
   // derive adjacent tile
-  switch(d)
+  switch(pacman_direction)
     {
     case RIGHT:
       tx++;
@@ -190,20 +208,11 @@ void game_check_maze_collision(unsigned short x, unsigned short y, Direction d, 
       break;
     }
 
-  if (dotmap[ty+tx]>0xFC)
+  if (dot_check_wall(current_player,tx,ty))
     {
-
       // We hit a wall, zero out dx/dy
-      dx=dy=0;
+      pacman_dx=pacman_dx=0;
     }
-}
-
-/**
- * Check pac-man's collisions
- */
-void game_check_collisions_pacman(void)
-{
-  game_check_maze_collision(pacman_x,pacman_y,pacman_direction,&pacman_dx,&pacman_dy);
 }
 
 /**
@@ -251,7 +260,7 @@ void game_loop(void)
 
   game_check_collisions();
   game_animate_objects();
-  /* game_move_objects(); */
+  game_move_objects();
   game_plot();
   
   vblank_wait();

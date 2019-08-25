@@ -5,7 +5,10 @@
 #ifndef DOTS_H
 #define DOTS_H
 
-#define PIXEL_TO_DOT(x,y) ((y+2)/6)+((x+4)/6)
+#include <stdbool.h>
+
+#define PIXEL_TO_DOT_X(x) (x/6)
+#define PIXEL_TO_DOT_Y(y) (y/6)
 
 /**
  * Reset dotmap (for e.g. new stage)
@@ -26,5 +29,10 @@ void dot_plot(unsigned char p, unsigned short d);
  * plot all dots for given player
  */
 void dots_plot(unsigned char p);
+
+/**
+ * Check for wall
+ */
+bool dot_check_wall(unsigned char p, unsigned char tx, unsigned char ty);
 
 #endif /* DOTS_H*/

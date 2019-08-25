@@ -4,12 +4,13 @@
 
 #include <i86.h>
 #include <string.h>
+#include "dots.h"
 
 const unsigned short dot_to_pixel_x[]={2,8,14,20,26,32,38,44,50,56,62,68,74,80,86,92,98,104,110,116,122,128,134,140,146,152,158,164,170,176,182,188};
 
 const unsigned short dot_to_pixel_y[]={4,10,16,22,28,34,40,46,52,58,64,70,76,82,88,94,100,106,112,118,124,130,136,142,148,154,160,166,172,178,184,190};
 
-const unsigned char dotmap[1024]=
+const unsigned char dotmap_new[1024]=
   {
    0xfc, 0xfc, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfc, 0xfc,
    0xfc, 0xfc, 0xff, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0xff, 0xff, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0xff, 0xfc, 0xfc, 
@@ -59,7 +60,7 @@ unsigned short dotbp[10];
  */
 void dots_new(unsigned char* dest)
 {
-  memcpy(dest,&dotmap,sizeof(dotmap));
+  memcpy(dest,&dotmap_new,sizeof(dotmap_new));
 }
 
 /**
@@ -123,8 +124,17 @@ void dots_plot(unsigned char p)
 {
   unsigned short i;
   
-  for (i=0;i<sizeof(dotmap);i++)
+  for (i=0;i<sizeof(dotmap_new);i++)
     {
       dot_plot(p,i);
     }
+}
+
+/**
+ * Check for wall
+ */
+bool dot_check_wall(unsigned char p, unsigned char tx, unsigned char ty)
+{
+  unsigned char d=(p==0 ? dotmap_0[(ty<<5)+tx] : dotmap_1[(ty<<5)+tx]);
+  return d>0xFC;
 }
